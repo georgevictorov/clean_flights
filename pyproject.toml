@@ -1,0 +1,28 @@
+[project]
+name = "flights"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "georgiiviktorov",email = "nowayisleft@gmail.com"}
+]
+
+packages = [
+    { include = "flights", from = "src" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "flask (>=3.1.3,<4.0.0)",
+    "gunicorn (>=26.0.0,<27.0.0)"
+]
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "isort (>=8.0.1,<9.0.0)",
+    "requests (>=2.34.2,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
