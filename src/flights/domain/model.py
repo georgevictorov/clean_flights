@@ -11,60 +11,86 @@ class FlightStatus(Enum):
 
 
 @dataclass
-class Reservation:
-    passenger_id: str
+class Seat:
     seat_id: str
+    passenger_id: str | None = None
+
+    @property
+    def is_reserved(self) -> bool:
+        return self.passenger_id is not None
+
+    def assign(self, passenger_id: str):
+        self.passenger_id = passenger_id
+
+    def clear(self):
+        self.passenger_id = None
 
 
 class Flight:
     def __init__(
             self,
             flight_id: str,
-            seats: set[str],
-            reservations: dict[str, Reservation],
+            seats: dict[str, Seat],
             flight_status: FlightStatus = FlightStatus.OPEN,
-            version_number: int = 1
+            version_number: int = 1,
     ):
         self.flight_id = flight_id
         self.seats = seats
-        self.reservations = reservations
         self.flight_status = flight_status
         self.version_number = version_number
 
     def reserve(self, passenger_id: str, seat_id: str):
         if self.flight_status != FlightStatus.OPEN:
-            raise errors.FlightClosed("flight status must be OPEN")
+            raise errors.FlightClosed()
 
-        reservation = Reservation(passenger_id, seat_id)
+        if self._has_passenger(passenger_id):
+            raise errors.PassengerAlreadyRegistered('passenger already registered')
 
-        if reservation.seat_id not in self.seats:
-            raise errors.SeatDoesNotExist("seat does not exist")
-        if reservation.seat_id in self.reservations:
-            raise errors.SeatAlreadyReserved("seat already reserved")
-        if reservation.passenger_id in {r.passenger_id for r in self.reservations.values()}:
-            raise errors.PassengerAlreadyRegistered("passenger already registered")
+        seat = self._get_seat(seat_id)
 
-        self.reservations[reservation.seat_id] = reservation
+        if seat.is_reserved:
+            raise errors.SeatAlreadyReserved('seat already reserved')
 
-    def cancel(self, passenger_id: str, seat_id: str):
+        seat.assign(passenger_id)
+
+    def cancel(self, passenger_id: str):
         if self.flight_status == FlightStatus.DEPARTED:
-            raise errors.FlightDeparted("flight already departed")
+            raise errors.FlightDeparted('flight departed')
 
-        reservation = Reservation(passenger_id, seat_id)
+        seat = self._find_passenger_seat(passenger_id)
 
-        existing = self.reservations.get(reservation.seat_id)
-
-        if not existing:
+        if seat is None:
             return
 
-        if existing.passenger_id != reservation.passenger_id:
-            raise errors.NotReservationOwner
+        seat.clear()
 
-        del self.reservations[reservation.seat_id]
+    def _get_seat(self, seat_id: str) -> Seat:
+        seat = self.seats.get(seat_id)
+
+        if seat is None:
+            raise errors.SeatDoesNotExist(
+                "seat does not exist"
+            )
+
+        return seat
+
+    def _has_passenger(self, passenger_id: str) -> bool:
+        return any(
+            seat.passenger_id == passenger_id
+            for seat in self.seats.values()
+        )
+
+    def _find_passenger_seat(self, passenger_id: str) -> Seat | None:
+        return next(
+            (
+                seat
+                for seat in self.seats.values()
+                if seat.passenger_id == passenger_id
+            ),
+            None,
+        )
 
     def __eq__(self, other):
         if not isinstance(other, Flight):
             return False
         return self.flight_id == other.flight_id
-
-
