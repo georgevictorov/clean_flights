@@ -188,3 +188,14 @@ def test_persistence_state():
             ("A4", None),
         )
     )
+
+
+def test_property_seats():
+    flight = create_flight()
+
+    assert tuple(flight.seats) == (
+        model.Seat(seat_id="A1", passenger_id=None),
+        model.Seat(seat_id="A2", passenger_id=None),
+        model.Seat(seat_id="A3", passenger_id=None),
+        model.Seat(seat_id="A4", passenger_id=None),
+    )

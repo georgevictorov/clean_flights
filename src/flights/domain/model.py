@@ -50,6 +50,10 @@ class Flight:
         return self._flight_status
 
     @property
+    def seats(self) -> Iterable[Seat]:
+        return self._seats.values()
+
+    @property
     def persistence_state(self):
 
         return (
