@@ -4,15 +4,9 @@ from flights.domain import errors, model
 
 
 def create_flight():
-    return model.Flight(
+    return model.Flight.create_new(
         flight_id="su-104",
-        version_number=1,
-        seats={
-            "A1": model.Seat("A1"),
-            "A2": model.Seat("A2"),
-            "A3": model.Seat("A3"),
-            "A4": model.Seat("A4"),
-        },
+        seat_ids=["A1", "A2", "A3", "A4"],
     )
 
 
@@ -23,7 +17,7 @@ def test_reserve_success():
 
     flight.reserve("p1", "A2")
 
-    assert flight.seats["A2"].passenger_id == "p1"
+    assert flight._get_seat("A2").passenger_id == "p1"
 
 
 def test_reserve_multiple_success():
@@ -32,13 +26,13 @@ def test_reserve_multiple_success():
     flight.reserve("p1", "A2")
     flight.reserve("p2", "A3")
 
-    assert flight.seats["A2"].passenger_id == "p1"
-    assert flight.seats["A3"].passenger_id == "p2"
+    assert flight._get_seat("A2").passenger_id == "p1"
+    assert flight._get_seat("A3").passenger_id == "p2"
 
 
 def test_reserve_failure_flight_closed():
     flight = create_flight()
-    flight.flight_status = model.FlightStatus.CLOSED
+    flight.close_registration()
 
     with pytest.raises(errors.FlightClosed):
         flight.reserve("p1", "A2")
@@ -77,7 +71,7 @@ def test_cancel_success():
     flight.reserve("p1", "A2")
     flight.cancel("p1")
 
-    assert flight.seats["A2"].passenger_id is None
+    assert flight._get_seat("A2").passenger_id is None
     assert not flight._has_passenger("p1")
 
 
@@ -90,7 +84,7 @@ def test_cancel_idempotent():
     flight.cancel("p1")
     flight.cancel("p1")
 
-    assert flight.seats["A2"].passenger_id is None
+    assert flight._get_seat("A2").passenger_id is None
 
 
 def test_cancel_unknown_passenger_is_noop():
@@ -100,14 +94,14 @@ def test_cancel_unknown_passenger_is_noop():
 
     flight.cancel("p2")
 
-    assert flight.seats["A2"].passenger_id == "p1"
+    assert flight._get_seat("A2").passenger_id == "p1"
 
 
 def test_cancel_failure_flight_departed():
     flight = create_flight()
 
     flight.reserve("p1", "A2")
-    flight.flight_status = model.FlightStatus.DEPARTED
+    flight.depart()
 
     with pytest.raises(errors.FlightDeparted):
         flight.cancel("p1")
@@ -123,7 +117,7 @@ def test_reserve_after_cancel_same_seat():
 
     flight.reserve("p2", "A2")
 
-    assert flight.seats["A2"].passenger_id == "p2"
+    assert flight._get_seat("A2").passenger_id == "p2"
 
 
 def test_flight_equality():
@@ -132,9 +126,9 @@ def test_flight_equality():
 
     assert f1 == f2
 
-    f3 = model.Flight(
+    f3 = model.Flight.create_new(
         flight_id="different",
-        seats=create_flight().seats,
+        seat_ids=["A1", "A2", "A3", "A4"],
     )
 
     assert f1 != f3

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Iterable
 
 from flights.domain import errors
 
@@ -30,14 +31,31 @@ class Flight:
     def __init__(
             self,
             flight_id: str,
-            seats: dict[str, Seat],
+            seats: Iterable[Seat],
             flight_status: FlightStatus = FlightStatus.OPEN,
             version_number: int = 1,
     ):
         self.flight_id = flight_id
-        self.seats = seats
-        self.flight_status = flight_status
+        self._seats = {seat.seat_id: seat for seat in seats}
+        self._flight_status = flight_status
         self.version_number = version_number
+
+    @classmethod
+    def create_new(cls, flight_id: str, seat_ids: list[str]) -> "Flight":
+        seats = [Seat(seat_id) for seat_id in seat_ids]
+        return cls(flight_id=flight_id, seats=seats)
+
+    @property
+    def flight_status(self) -> FlightStatus:
+        return self._flight_status
+
+    def close_registration(self):
+        if self._flight_status == FlightStatus.DEPARTED:
+            raise errors.FlightDeparted()
+        self._flight_status = FlightStatus.CLOSED
+
+    def depart(self):
+        self._flight_status = FlightStatus.DEPARTED
 
     def reserve(self, passenger_id: str, seat_id: str):
         if self.flight_status != FlightStatus.OPEN:
@@ -65,7 +83,7 @@ class Flight:
         seat.clear()
 
     def _get_seat(self, seat_id: str) -> Seat:
-        seat = self.seats.get(seat_id)
+        seat = self._seats.get(seat_id)
 
         if seat is None:
             raise errors.SeatDoesNotExist(
@@ -77,14 +95,14 @@ class Flight:
     def _has_passenger(self, passenger_id: str) -> bool:
         return any(
             seat.passenger_id == passenger_id
-            for seat in self.seats.values()
+            for seat in self._seats.values()
         )
 
     def _find_passenger_seat(self, passenger_id: str) -> Seat | None:
         return next(
             (
                 seat
-                for seat in self.seats.values()
+                for seat in self._seats.values()
                 if seat.passenger_id == passenger_id
             ),
             None,
@@ -94,3 +112,6 @@ class Flight:
         if not isinstance(other, Flight):
             return False
         return self.flight_id == other.flight_id
+
+    def __hash__(self):
+        return hash(self.flight_id)
