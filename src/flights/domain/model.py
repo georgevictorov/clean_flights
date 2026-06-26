@@ -49,6 +49,21 @@ class Flight:
     def flight_status(self) -> FlightStatus:
         return self._flight_status
 
+    @property
+    def persistence_state(self):
+
+        return (
+            self.flight_status,
+            self.version_number,
+            tuple(
+                (
+                    seat.seat_id,
+                    seat.passenger_id,
+                )
+                for seat in self._seats.values()
+            ),
+        )
+
     def close_registration(self):
         if self._flight_status == FlightStatus.DEPARTED:
             raise errors.FlightDeparted()

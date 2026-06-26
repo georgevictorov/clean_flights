@@ -173,3 +173,18 @@ def test_flight_equality_with_different_types():
     flight = create_flight()
     assert flight != "not_a_flight_object"
     assert flight is not None
+
+
+def test_persistence_state():
+    flight = create_flight()
+
+    assert flight.persistence_state == (
+        model.FlightStatus.OPEN,
+        1,
+        (
+            ("A1", None),
+            ("A2", None),
+            ("A3", None),
+            ("A4", None),
+        )
+    )
