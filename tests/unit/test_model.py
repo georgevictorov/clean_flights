@@ -63,6 +63,22 @@ def test_reserve_failure_seat_already_reserved_by_other():
         flight.reserve("p2", "A2")
 
 
+def test_reserve_failure_flight_departed():
+    flight = create_flight()
+    flight.depart()
+
+    with pytest.raises(errors.FlightClosed):
+        flight.reserve("p1", "A2")
+
+
+def test_reserve_same_passenger_same_seat_twice():
+    flight = create_flight()
+    flight.reserve("p1", "A2")
+
+    with pytest.raises(errors.PassengerAlreadyRegistered):
+        flight.reserve("p1", "A2")
+
+
 # CANCEL
 
 def test_cancel_success():
@@ -132,3 +148,28 @@ def test_flight_equality():
     )
 
     assert f1 != f3
+
+
+def test_cannot_close_registration_after_departure():
+    flight = create_flight()
+    flight.depart()
+
+    with pytest.raises(errors.FlightDeparted):
+        flight.close_registration()
+
+
+def test_status_change_preserves_passenger_data():
+    flight = create_flight()
+    flight.reserve("p1", "A2")
+
+    flight.close_registration()
+    assert flight._get_seat("A2").passenger_id == "p1"
+
+    flight.depart()
+    assert flight._get_seat("A2").passenger_id == "p1"
+
+
+def test_flight_equality_with_different_types():
+    flight = create_flight()
+    assert flight != "not_a_flight_object"
+    assert flight is not None
