@@ -5,8 +5,8 @@ from flights.service_layer.uow import AbstractUnitOfWork
 
 
 class InMemoryUnitOfWork(AbstractUnitOfWork):
-    def __init__(self):
-        self.flights: AbstractRepository = InMemoryRepository()
+    def __init__(self, repository: AbstractRepository = InMemoryRepository()):
+        self.flights = repository
         self.committed = False
 
     def commit(self):
