@@ -1,4 +1,5 @@
-from flights.domain import commands, errors, model
+from flights.service_layer import commands
+from flights.domain import errors, model
 from flights.service_layer.uow import AbstractUnitOfWork
 
 

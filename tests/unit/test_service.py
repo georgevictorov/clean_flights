@@ -1,7 +1,7 @@
 import pytest
 
-from flights.domain.commands import (CancelReservation, CreateFlight,
-                                     ReserveSeat)
+from flights.service_layer.commands import (CancelReservation, CreateFlight,
+                                            ReserveSeat)
 from flights.domain.errors import FlightAlreadyExists, FlightNotFound
 from flights.infrastructure.repo.memory.memory_repository import \
     InMemoryRepository
