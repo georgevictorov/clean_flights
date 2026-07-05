@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.postgres
 
-    image: flights-postgres:0.1.0
+    image: ${REGISTRY_HOST}/flights-postgres:0.1.0
 
     restart: unless-stopped
 
@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile.dbmate
 
-    image: flights-migrations:0.1.0
+    image: ${REGISTRY_HOST}/flights-migrations:0.1.0
 
     depends_on:
       postgres:
@@ -39,7 +39,7 @@ services:
     command: up
 
   migrate-test:
-    image: flights-migrations:0.1.0
+    image: ${REGISTRY_HOST}/flights-migrations:0.1.0
 
     depends_on:
       migrate:
@@ -57,7 +57,7 @@ services:
 
     restart: unless-stopped
 
-    image: flights-image:0.1.0
+    image: ${REGISTRY_HOST}/flights-image:0.1.0
 
     depends_on:
       migrate-test:
