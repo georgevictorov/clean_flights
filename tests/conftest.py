@@ -38,10 +38,10 @@ def db_connection(db_pool):
 
 
 @pytest.fixture
-def clean_db(db_connection):
-    with db_connection.cursor() as cur:
-        cur.execute("truncate table flights, seats cascade")
-
-    db_connection.commit()
+def clean_db(db_pool):
+    with db_pool.connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("truncate table flights, seats restart identity cascade")
+        conn.commit()
 
     yield
