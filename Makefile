@@ -9,7 +9,7 @@ up:
 	docker compose up -d
 
 down:
-	docker compose down --remove-orphans
+	docker compose down -v --remove-orphans
 
 test: up
 	docker compose run --rm --no-deps api pytest tests

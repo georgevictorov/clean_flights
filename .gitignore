@@ -2,4 +2,4 @@
 .idea
 .env
 __pycache__
-compose.override.yaml
+compose.override.yml
