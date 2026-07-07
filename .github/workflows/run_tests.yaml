@@ -17,7 +17,6 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_PORT: ${{ secrets.DB_PORT }}
-      POSTGRES_DB_TEST: ${{ secrets.POSTGRES_DB_TEST }}
       REGISTRY_HOST: ${{ secrets.REGISTRY_HOST }}
 
     steps:
