@@ -52,10 +52,18 @@ services:
         condition: service_completed_successfully
 
     ports:
-      - "5005:80"
+      - "80"
 
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
+    command:
+      - gunicorn
+      - --workers
+      - "4"
+      - --bind
+      - 0.0.0.0:80
+      - flights.api.flask.wsgi:application
 
 volumes:
   postgres_data:
