@@ -51,9 +51,6 @@ services:
       migrate:
         condition: service_completed_successfully
 
-    ports:
-      - "80"
-
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
