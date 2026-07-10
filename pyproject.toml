@@ -3,7 +3,7 @@ name = "flights"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "georgiiviktorov",email = "nowayisleft@gmail.com"}
+    { name = "georgiiviktorov", email = "nowayisleft@gmail.com" }
 ]
 
 packages = [
@@ -20,7 +20,9 @@ dependencies = [
 dev = [
     "pytest (>=9.1.1,<10.0.0)",
     "isort (>=8.0.1,<9.0.0)",
-    "requests (>=2.34.2,<3.0.0)"
+    "requests (>=2.34.2,<3.0.0)",
+    "coverage (>=7.15.0,<8.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
 ]
 
 
