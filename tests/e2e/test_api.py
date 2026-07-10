@@ -22,6 +22,16 @@ def reserve_seat(client, api_url, flight_id="SU-100", passenger_id="P1", seat_id
     )
 
 
+def cancel_registration(client, api_url, flight_id="SU-100", passenger_id="P1"):
+    return client.post(
+        f"{api_url}/cancel_reservation",
+        json={
+            "flight_id": flight_id,
+            "passenger_id": passenger_id,
+        }
+    )
+
+
 def test_create_flight(client, api_url, clean_db):
     response = create_flight(client, api_url)
 
@@ -108,6 +118,7 @@ def test_reserve_seat_passenger_already_registered(client, api_url, clean_db):
     assert response.status_code == 409
     assert response.json() == {"msg": "passenger already registered"}
 
+
 def test_reserve_seat_seat_already_reserved(client, api_url, clean_db):
     response = create_flight(client, api_url)
 
@@ -121,3 +132,24 @@ def test_reserve_seat_seat_already_reserved(client, api_url, clean_db):
 
     assert response.status_code == 409
     assert response.json() == {"msg": "seat already reserved"}
+
+
+def test_cancel_reservation(client, api_url, clean_db):
+    response = create_flight(client, api_url)
+
+    assert response.status_code == 201
+
+    response = reserve_seat(client, api_url)
+
+    assert response.status_code == 204
+
+    response = cancel_registration(client, api_url)
+
+    assert response.status_code == 204
+
+
+def test_cancel_reservation_flight_not_found(client, api_url, clean_db):
+    response = cancel_registration(client, api_url)
+
+    assert response.status_code == 404
+    assert response.json() == {"msg": "flight not found"}
