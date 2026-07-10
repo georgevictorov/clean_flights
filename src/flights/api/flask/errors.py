@@ -1,7 +1,11 @@
+import logging
+
 from flask import jsonify
 from werkzeug.exceptions import BadRequest
 
 from flights.domain import errors
+
+logger = logging.getLogger(__name__)
 
 ERROR_CODES = {
     errors.FlightNotFound: 404,
@@ -24,8 +28,16 @@ def register_error_handlers(flask_app):
 
     @flask_app.errorhandler(errors.InfrastructureError)
     def handle_infrastructure_error(error):
+        logger.exception("infrastructure error: %s", error)
+
         return jsonify({'msg': "try back later"}), 500
 
     @flask_app.errorhandler(BadRequest)
     def handle_bad_request(error):
         return jsonify({'msg': error.description}), 400
+
+    @flask_app.errorhandler(Exception)
+    def handle_unexpected_error(error):
+        logger.exception("unhandled exception: %s", error)
+
+        return jsonify({"msg": "try back later"}), 500
