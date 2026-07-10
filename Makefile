@@ -1,4 +1,4 @@
-.PHONY: all build up down test unit-tests integration-tests e2e-tests logs
+.PHONY: all build up down test unit-tests integration-tests e2e-tests logs coverage
 
 all: down build up test
 
@@ -22,5 +22,12 @@ integration-tests: up
 
 e2e-tests: up
 	docker compose run --rm --no-deps api pytest tests/e2e
+
 logs:
 	docker compose logs -f api
+
+coverage: up
+	docker compose run --rm --no-deps api \
+		pytest tests \
+		--cov=flights \
+		--cov-report=term-missing
